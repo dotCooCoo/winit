@@ -281,10 +281,11 @@ impl KeyEventBuilder {
                                 ..ev.clone()
                             };
                             let release_token = self.pending.add_pending();
-                            let early = self.pending.complete_pending(
-                                release_token,
-                                MessageAsKeyEvent { event: release, is_synthetic: false },
-                            );
+                            let early =
+                                self.pending.complete_pending(release_token, MessageAsKeyEvent {
+                                    event: release,
+                                    is_synthetic: false,
+                                });
                             debug_assert!(
                                 early.is_empty(),
                                 "the release went out before its press"
