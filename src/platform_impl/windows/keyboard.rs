@@ -1323,7 +1323,7 @@ mod alt_code_tests {
     use windows_sys::Win32::UI::Input::KeyboardAndMouse::{VK_MENU, VK_RETURN};
     use windows_sys::Win32::UI::WindowsAndMessaging::{
         CreateWindowExW, DestroyWindow, PeekMessageW, PostMessageW, HWND_MESSAGE, MSG, PM_REMOVE,
-        WM_CHAR, WM_KEYUP,
+        WM_CHAR, WM_KEYUP, WM_SYSKEYUP,
     };
 
     use super::{KeyEventBuilder, MessageAsKeyEvent};
@@ -1338,9 +1338,10 @@ mod alt_code_tests {
         (1 | scancode << 16 | 1 << 30 | 1 << 31) as LPARAM
     }
 
-    /// A key release, then the `WM_CHAR` Windows queues after it, through one builder: the events
-    /// for the release and for the character.
+    /// A key release (`WM_KEYUP` or `WM_SYSKEYUP`), then the `WM_CHAR` Windows queues after it,
+    /// through one builder: the events for the release and for the character.
     fn release_then_char(
+        up_msg: u32,
         vkey: u16,
         scancode: u32,
         ch: char,
@@ -1367,8 +1368,7 @@ mod alt_code_tests {
         assert_ne!(unsafe { PostMessageW(window, WM_CHAR, ch as WPARAM, lparam) }, 0);
         let builder = KeyEventBuilder::default();
         let mut result = ProcResult::DefWindowProc(0);
-        let release =
-            builder.process_message(window, WM_KEYUP, vkey as WPARAM, lparam, &mut result);
+        let release = builder.process_message(window, up_msg, vkey as WPARAM, lparam, &mut result);
         let mut msg: MSG = unsafe { mem::zeroed() };
         assert_ne!(unsafe { PeekMessageW(&mut msg, window, WM_CHAR, WM_CHAR, PM_REMOVE) }, 0);
         let typed =
@@ -1380,7 +1380,17 @@ mod alt_code_tests {
     #[test]
     fn an_alt_code_types_its_character() {
         // Alt+0181: Windows sends µ after Alt's release (storytold/pdfcraft#5746).
-        let (release, typed) = release_then_char(VK_MENU, 0x38, 'µ');
+        assert_alt_code_types(WM_KEYUP);
+    }
+
+    #[test]
+    fn an_alt_code_types_its_character_after_a_syskeyup() {
+        // Alt's release can also arrive as `WM_SYSKEYUP`; the builder treats both the same.
+        assert_alt_code_types(WM_SYSKEYUP);
+    }
+
+    fn assert_alt_code_types(up_msg: u32) {
+        let (release, typed) = release_then_char(up_msg, VK_MENU, 0x38, 'µ');
         let [alt] = release.as_slice() else {
             panic!("{} events for Alt's release", release.len())
         };
@@ -1399,7 +1409,7 @@ mod alt_code_tests {
     fn a_character_after_another_release_is_still_left_to_the_ime() {
         // Only Alt's release ends an Alt code; a character queued after any other release is
         // input method text, which reaches the app as `Ime` events.
-        let (_, typed) = release_then_char(VK_RETURN, 0x1c, 'x');
+        let (_, typed) = release_then_char(WM_KEYUP, VK_RETURN, 0x1c, 'x');
         assert!(typed.is_empty(), "{} events for x", typed.len());
     }
 }
