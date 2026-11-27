@@ -1,5 +1,5 @@
 //! Opt-in native protocol probe; driven by a private compositor, never a user's clipboard.
-#[cfg(all(unix, not(target_os = "macos"), feature = "wayland"))]
+#[cfg(wayland_platform)]
 mod probe {
     use std::sync::Arc;
     use std::time::{Duration, Instant};
@@ -212,10 +212,10 @@ mod probe {
         event_loop.run_app(&mut app).expect("native probe event loop");
     }
 }
-#[cfg(all(unix, not(target_os = "macos"), feature = "wayland"))]
+#[cfg(wayland_platform)]
 #[path = "util/fill.rs"]
 mod fill;
 fn main() {
-    #[cfg(all(unix, not(target_os = "macos"), feature = "wayland"))]
+    #[cfg(wayland_platform)]
     probe::run();
 }

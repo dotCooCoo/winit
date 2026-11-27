@@ -6,9 +6,13 @@
 
 use std::path::Path;
 
+/// The source with `\n` line endings: a Windows checkout has `\r\n` (`* text=auto`), and some
+/// tests match code that spans lines.
 fn source(path: &str) -> String {
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("src/platform_impl").join(path);
-    std::fs::read_to_string(&path).unwrap_or_else(|err| panic!("{}: {err}", path.display()))
+    std::fs::read_to_string(&path)
+        .unwrap_or_else(|err| panic!("{}: {err}", path.display()))
+        .replace("\r\n", "\n")
 }
 
 /// The text after `start`, up to the first `end`.
