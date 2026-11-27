@@ -12,6 +12,10 @@ mod macos;
 #[cfg(orbital_platform)]
 mod orbital;
 #[cfg(web_platform)]
+// The code `#[wasm_bindgen]` generates in newer wasm-bindgen releases uses `const` features
+// stable since Rust 1.77, which clippy reports against the 1.70 MSRV. The MSRV build locks an
+// older wasm-bindgen.
+#[allow(clippy::incompatible_msrv)]
 mod web;
 #[cfg(windows_platform)]
 mod windows;

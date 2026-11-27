@@ -60,6 +60,13 @@ jobs:
           - { name: 'iOS Aarch64',        target: aarch64-apple-ios,        os: macos-latest,    }
           - { name: 'web',                target: wasm32-unknown-unknown,   os: ubuntu-latest,   }
         exclude:
+          # Rust 1.100 no longer ships host tools for i686-pc-windows-gnu, so the
+          # stable-i686-pc-windows-gnu and nightly toolchains can't be installed. 1.70.0 still
+          # covers the target.
+          - toolchain: stable
+            platform: { name: 'Windows 32bit GNU' }
+          - toolchain: nightly
+            platform: { name: 'Windows 32bit GNU' }
           # Android is tested on stable-3
           - toolchain: '1.70.0'
             platform: { name: 'Android', target: aarch64-linux-android, os: ubuntu-latest, options: '--package=winit --features=android-native-activity', cmd: 'apk --' }
