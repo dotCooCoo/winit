@@ -1,5 +1,10 @@
 # documentation: https://github.com/crate-ci/typos/blob/master/docs/reference.md
 
+[default]
+extend-ignore-re = [
+    "6a87addd", # A commit SHA in PATCHES.md and docs/egui-037-migration-plan.md
+]
+
 [default.extend-identifiers]
 ptd = "ptd"                         # From windows_sys::Win32::System::Com::FORMATETC { ptd, ..}
 TME_LEAVE = "TME_LEAVE"             # From windows_sys::Win32::UI::Input::KeyboardAndMouse::TME_LEAVE

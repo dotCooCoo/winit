@@ -60,6 +60,13 @@ jobs:
           - { name: 'iOS Aarch64',        target: aarch64-apple-ios,        os: macos-latest,    }
           - { name: 'web',                target: wasm32-unknown-unknown,   os: ubuntu-latest,   }
         exclude:
+          # Rust 1.100 no longer ships host tools for i686-pc-windows-gnu, so the
+          # stable-i686-pc-windows-gnu and nightly toolchains can't be installed. 1.70.0 still
+          # covers the target.
+          - toolchain: stable
+            platform: { name: 'Windows 32bit GNU' }
+          - toolchain: nightly
+            platform: { name: 'Windows 32bit GNU' }
           # Android is tested on stable-3
           - toolchain: '1.70.0'
             platform: { name: 'Android', target: aarch64-linux-android, os: ubuntu-latest, options: '--package=winit --features=android-native-activity', cmd: 'apk --' }
@@ -107,6 +114,10 @@ jobs:
 
     - name: Generate lockfile
       # Also updates the crates.io index
+      env:
+        # This step runs with the runner's cargo, before the matrix toolchain is installed.
+        # On the 1.70.0 jobs, it picks dependency versions whose `rust-version` allows 1.70.0.
+        CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS: ${{ matrix.toolchain == '1.70.0' && 'fallback' || 'allow' }}
       run: |
            cargo generate-lockfile
            cargo update -p ahash --precise 0.8.7
@@ -115,9 +126,13 @@ jobs:
            cargo update -p objc2-encode --precise 4.0.3
            cargo update -p orbclient --precise 0.3.47
            cargo update -p image --precise 0.25.0
-           cargo update -p gethostname@1.1.0 --precise 1.0.2
+           cargo update -p gethostname@1 --precise 1.0.2
            cargo update -p unicode-ident --precise 1.0.10
-           cargo update -p syn --precise 2.0.114
+           cargo update -p serde --precise 1.0.228
+           cargo update -p foreign-types-macros --precise 0.2.3
+           cargo update -p tracing-web --precise 0.1.3
+           cargo update -p wasm-bindgen -p wasm-bindgen-futures -p js-sys -p web-sys
+           cargo update -p syn@2 --precise 2.0.114
 
     - name: Install GCC Multilib
       if: (matrix.platform.os == 'ubuntu-latest') && contains(matrix.platform.target, 'i686')

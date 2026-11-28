@@ -42,6 +42,11 @@ skip = [
     { crate = "bitflags@1", reason = "the ecosystem is in the process of migrating" },
     { crate = "rustix@0.38", reason = "the ecosystem is in the process of migrating" },
     { crate = "linux-raw-sys@0.4", reason = "the ecosystem is in the process of migrating" },
+    { crate = "syn@2", reason = "the ecosystem is in the process of migrating" },
+    { crate = "thiserror@1", reason = "the ecosystem is in the process of migrating" },
+    { crate = "thiserror-impl@1", reason = "the ecosystem is in the process of migrating" },
+    { crate = "jni-sys@0.3", reason = "jni-sys 0.3.1 depends on jni-sys 0.4" },
+    { crate = "redox_syscall@0.4", reason = "winit and orbclient depend on different versions" },
 ]
 wildcards = "allow" # at least until https://github.com/EmbarkStudios/cargo-deny/issues/241 is fixed
 
@@ -52,6 +57,7 @@ interpreted = "deny"
 [[bans.build.bypass]]
 allow = [
     { path = "generate-bindings.sh", checksum = "268ec23248218d779e33853cdc60e2985e70214ff004716cd734270de1f6b561" },
+    { path = "android-games-sdk/import-games-sdk.sh", checksum = "98ed2741804d10ddbd8d035557897ab1edc5257705759377271dcb4ba5636446" },
 ]
 crate = "android-activity"
 

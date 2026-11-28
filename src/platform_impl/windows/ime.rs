@@ -182,7 +182,7 @@ impl ImeContext {
 
     /// Applies a change to the hidden system caret that follows the IME cursor area
     /// (`ime_caret.rs`). Runs on the window's thread, which owns the caret.
-    pub unsafe fn update_system_caret(hwnd: HWND, change: Option<CaretChange>) {
+    pub(crate) unsafe fn update_system_caret(hwnd: HWND, change: Option<CaretChange>) {
         match change {
             None => {},
             // A new caret is hidden, and this one is never shown.
