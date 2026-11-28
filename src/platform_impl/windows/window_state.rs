@@ -251,6 +251,13 @@ impl MouseProperties {
 }
 
 impl WindowFlags {
+    /// Returns whether a window with these flags is kept off the taskbar when `skip` is requested.
+    ///
+    /// A tool window always stays off the taskbar, so `skip == false` does not add it.
+    pub fn skip_taskbar(self, skip: bool) -> bool {
+        skip || self.contains(WindowFlags::TOOL_WINDOW)
+    }
+
     fn mask(mut self) -> WindowFlags {
         if self.contains(WindowFlags::MARKER_EXCLUSIVE_FULLSCREEN) {
             self |= WindowFlags::EXCLUSIVE_FULLSCREEN_OR_MASK;
@@ -592,5 +599,19 @@ mod tool_window_tests {
         assert_eq!(extended & WS_EX_TOOLWINDOW, 0);
         assert_ne!(extended & WS_EX_APPWINDOW, 0);
         assert_ne!(style & WS_SIZEBOX, 0);
+    }
+
+    #[test]
+    fn tool_window_stays_off_the_taskbar_after_skip_taskbar_false() {
+        let tool = WindowFlags::ON_TASKBAR | WindowFlags::TOOL_WINDOW;
+        assert!(tool.skip_taskbar(false));
+        assert!(tool.skip_taskbar(true));
+    }
+
+    #[test]
+    fn normal_window_toggles_skip_taskbar() {
+        let normal = WindowFlags::ON_TASKBAR | WindowFlags::RESIZABLE;
+        assert!(!normal.skip_taskbar(false));
+        assert!(normal.skip_taskbar(true));
     }
 }

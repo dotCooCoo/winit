@@ -271,6 +271,9 @@ pub trait WindowExtWindows {
     fn set_taskbar_icon(&self, taskbar_icon: Option<Icon>);
 
     /// Whether to show or hide the window icon in the taskbar.
+    ///
+    /// A window created with [`WindowAttributesExtWindows::with_tool_window`] stays off the
+    /// taskbar, and `set_skip_taskbar(false)` does not add it.
     fn set_skip_taskbar(&self, skip: bool);
 
     /// Shows or hides the background drop shadow for undecorated windows.
@@ -497,11 +500,16 @@ pub trait WindowAttributesExtWindows {
     fn with_drag_and_drop(self, flag: bool) -> Self;
 
     /// Whether show or hide the window icon in the taskbar.
+    ///
+    /// A tool window ([`WindowAttributesExtWindows::with_tool_window`]) is kept off the taskbar
+    /// whatever this is set to.
     fn with_skip_taskbar(self, skip: bool) -> Self;
 
     /// Requests the Windows tool-window style (`WS_EX_TOOLWINDOW`).
     ///
     /// Tool windows are created without taskbar or Alt-Tab entries. This defaults to `false`.
+    /// A tool window stays off the taskbar for its whole life: `with_skip_taskbar(false)` and
+    /// [`WindowExtWindows::set_skip_taskbar`]`(false)` do not add it.
     /// See <https://learn.microsoft.com/en-us/windows/win32/winmsg/extended-window-styles>.
     fn with_tool_window(self, tool_window: bool) -> Self;
 

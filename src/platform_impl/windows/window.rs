@@ -1019,7 +1019,12 @@ impl Window {
 
     #[inline]
     pub fn set_skip_taskbar(&self, skip: bool) {
-        self.window_state_lock().skip_taskbar = skip;
+        let skip = {
+            let mut window_state = self.window_state_lock();
+            let skip = window_state.window_flags.skip_taskbar(skip);
+            window_state.skip_taskbar = skip;
+            skip
+        };
         unsafe { set_skip_taskbar(self.hwnd(), skip) };
     }
 
