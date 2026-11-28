@@ -31,6 +31,8 @@ use crate::window::{Window, WindowAttributes, WindowId};
 
 pub use crate::window::Theme;
 
+// The clipboard needs the Wayland backend, which docs built for other platforms (`docsrs`) lack.
+#[cfg(wayland_platform)]
 pub use crate::platform_impl::wayland::clipboard::{
     ClipboardContent, ClipboardError, ImageClaimReservation, InputOriginToken, PngBytes,
     PngBytesWriter, RegularTransferHandle, SelectionClaim, TransferHandle, TransferOptions,
@@ -43,6 +45,7 @@ pub trait ActiveEventLoopExtWayland {
     fn is_wayland(&self) -> bool;
 
     /// The clipboard of this event loop, or [`None`] if it doesn't use Wayland.
+    #[cfg(wayland_platform)]
     fn clipboard(&self) -> Option<Clipboard>;
 }
 
@@ -52,6 +55,7 @@ impl ActiveEventLoopExtWayland for ActiveEventLoop {
         self.p.is_wayland()
     }
 
+    #[cfg(wayland_platform)]
     fn clipboard(&self) -> Option<Clipboard> {
         #[allow(clippy::single_match)]
         match &self.p {
@@ -87,11 +91,13 @@ impl ActiveEventLoopExtWayland for ActiveEventLoop {
 /// `input_origin` and `reserve_image_claim` are synchronous state transitions used at that same
 /// input/output boundary. This is a caller contract; the type does not inspect which thread is
 /// currently calling it.
+#[cfg(wayland_platform)]
 #[derive(Clone)]
 pub struct Clipboard {
     state: Weak<crate::platform_impl::wayland::ClipboardState>,
 }
 
+#[cfg(wayland_platform)]
 impl Clipboard {
     /// The clipboard of the winit event loop connected through `display`, a `wl_display`
     /// pointer such as the one in its `WaylandDisplayHandle`, if that event loop still exists.
@@ -287,6 +293,7 @@ impl Clipboard {
     }
 }
 
+#[cfg(wayland_platform)]
 impl fmt::Debug for Clipboard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Clipboard").finish_non_exhaustive()
